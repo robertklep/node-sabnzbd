@@ -21,7 +21,7 @@ TL;DR
 Install
 -------
 
-* Install module first:
+* Install package first:
     - local installation: `npm install sabnzbd`
     - global installation: `npm install sabnzbd -g`
 * Get the API key from your SABnzbd:
@@ -31,8 +31,8 @@ Install
 			one)
 		- note down the API key, you'll need it
 
-API
----
+API basics
+----------
 
 For the most part, the API implements the commands found on [the SABnzbd
 API page](http://wiki.sabnzbd.org/api), and returns their results pretty
@@ -45,12 +45,42 @@ not terribly informative on the status of some commands; for instance, the
 `remove` commands will always return a `true` status, even if you're using
 an nonexistent NZB id.
 
-FWIW: SABnzbd has two main lists: the queue and the history. The queue
-contains all active downloads (the ones that haven't finished yet), the
-history contains all completed downloads.
+`sabnzbd` uses [Kris Kowal's 'q' library](https://github.com/kriskowal/q),
+which means that most commands return a promise. Use `.then(CALLBACK)` to
+wait for, and read, the results:
 
-`sabnzbd` uses [Kris Kowal's `q` library](https://github.com/kriskowal/q),
-which means that most commands return a promise.
+    sabnzbd.addurl(URL).then(YOUR_CALLBACK)
+
+If you're more adventurous, you can chain commands and add some `q` magic
+to the mix:
+
+    var Q = require('q');
+
+    sabnzbd
+      .addurl(URL)
+      .then(function(r) {
+        if (r.status == false)
+          // addurl failed, bail...
+          throw new Error("Something went wrong adding the url");
+        else
+          // delay for 2 seconds before getting the queue
+          return Q.delay(2000);
+      });
+      .then(function() {
+        return sabnzbd.queue()
+      })
+      .then(function(queue) {
+        // ... do something with the queue contents
+      })
+      .fail(function(error) {
+        console.log('Something went wrong!', error);
+      });
+
+Unless otherwise stated, all commands pass an object containing
+a `status` property as first argument to your callbacks.
+
+API
+---
 
 ### `new SABnzbd(URL, API_KEY)`
 
@@ -71,7 +101,7 @@ Returns:
 
 Get contents of the SABnzbd queue.
 
-Returns the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
+Provides the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
 with an extra property `entries` containing a normalized version of the `slots` property:
 
 An entry contains the following properties:
@@ -94,9 +124,10 @@ An entry contains the following properties:
 
 ### `instance.history()`
 
-Get contents of the SABnzbd history. Returns the output of the [history
-command](http://wiki.sabnzbd.org/api#toc11), with, again, an extra
-`entries` property:
+Get contents of the SABnzbd history.
+
+Provides the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
+with, again, an extra `entries` property:
 
     action_line    : ?
     size           : size in bytes
@@ -130,9 +161,10 @@ command](http://wiki.sabnzbd.org/api#toc11), with, again, an extra
 
 ### `instance.all()`
 
-Returns the contents of both the `queue` and `history` commands combined
+Provides the contents of both the `queue` and `history` commands combined
 (**NB**: for now, only the `slots` and `entries` are actually merged, the
-rest of the object returned is based object returned by the `queue` command).
+rest of the object returned is based on the object returned by the `queue`
+command).
 
 ### `instance.addurl(URL)`
 

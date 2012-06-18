@@ -16,10 +16,116 @@
     }
   };
 
-  // SABnzbd class
-  var SABnzbd = function(url, apikey, nzbkey) {
-    this.apikey = apikey;
-    this.nzbkey = nzbkey || apikey;
+//// SABnzbd queue class
+  var SABnzbdQueue = function(delegate) {
+    this.delegate = delegate;
+  };
+
+  // get queue status
+  SABnzbdQueue.prototype.status = function() {
+    var delegate = this.delegate;
+
+    return delegate.cmd('queue').then(function(response) {
+      var queue = response.queue || { slots: [] };
+
+      // normalize queue slots
+      var slots = queue.slots.map(function(slot) {
+        return delegate.normalize_queue(slot);
+      });
+      queue.entries = slots;
+
+      // done
+      return queue;
+    })
+  };
+
+  // get only a list of queue entries
+  SABnzbdQueue.prototype.entries = function() {
+    return this.status().then(function(queue) {
+      return queue.entries;
+    });
+  };
+
+  // add an NZB url to the queue
+  SABnzbdQueue.prototype.addurl = function(url) {
+    return this.delegate.cmd('addurl', { name : url });
+  };
+
+  // pause entire queue (with no argument) or a single download (with
+  // a single 'id' argument)
+  SABnzbdQueue.prototype.pause = function(id) {
+    if (id === undefined)
+      return this.delegate.cmd('pause');
+    else
+      return this.delegate.cmd('queue', { name : 'pause', value : id });
+  };
+
+  // resume entire queue (with no argument) or a single download (with
+  // a single 'id' argument)
+  SABnzbdQueue.prototype.resume = function(id) {
+    if (id === undefined)
+      return this.delegate.cmd('resume');
+    else
+      return this.delegate.cmd('queue', { name : 'resume', value : id });
+  };
+
+  // delete (an) item(s) from the queue (or pass 'all' as single argument
+  // to remove everything from the queue)
+  SABnzbdQueue.prototype.delete = function() {
+    return this.delegate.cmd('queue', { 
+      name  : 'delete', 
+      value : arguments.join(",")
+    });
+  };
+
+//// SABnzbd history class
+  var SABnzbdHistory = function(delegate) {
+    this.delegate = delegate;
+  };
+
+  // get history status
+  SABnzbdHistory.prototype.status = function() {
+    var delegate = this.delegate;
+
+    return delegate.cmd('history').then(function(response) {
+      var history = response.history || { slots: [] };
+
+      // normalize history slots
+      var slots = history.slots.map(function(slot) {
+        return delegate.normalize_history(slot);
+      });
+      history.entries = slots;
+
+      // done
+      return history;
+    });
+  };
+
+  // get only a list of history entries
+  SABnzbdHistory.prototype.entries = function() {
+    return this.status().then(function(history) {
+      return history.entries;
+    });
+  };
+
+  // delete (an) item(s) from the history (or pass 'all' as single
+  // argument to remove everything from the history)
+  SABnzbdHistory.prototype.delete = function() {
+    return this.delegate.cmd('history', { 
+      name  : 'delete', 
+      value : arguments.join(",")
+    });
+  };
+
+//// Main SABnzbd class
+  var SABnzbd = function(url, apikey, verbose) {
+    this.apikey   = apikey;
+    this.verbose  = verbose === true;
+    this.invalid  = false;
+
+    // instantiate queue/history classes
+    this.queue    = new SABnzbdQueue(this);
+    this.history  = new SABnzbdHistory(this);
 
     // attach API endpoint to url
     if (url.indexOf('/sabnzbd/api') == -1)
@@ -27,21 +133,37 @@
     this.url = url;
 
     // check for valid endpoint
+    var _this = this;
     this.version().then(function(version) {
-      util.log('SABnzbd version: ' + version);
+      if (_this.verbose)
+        util.log('SABnzbd version: ' + version);
+    }).fail(function(error) {
+      util.log('Version check failed: ' + error);
+      _this.invalid = true;
     });
 
     // check for valid API key
-    this.cmd('').then(function(response) {
-      if (response.indexOf('API Key Incorrect') != -1)
-        util.log("Supplied API key is invalid, things will probably start failing.");
-      else
-        util.log('SABnzbd accepted supplied API key.');
-    });
+    this.cmd('get_config')
+      .then(function(response) {
+        if (response.status === false)
+        {
+          util.log("Supplied API key was not accepted by the server");
+          _this.invalid = true;
+        }
+        else
+        if (_this.verbose)
+          util.log('SABnzbd accepted supplied API key.');
+      });
   };
 
   // perform command request
   SABnzbd.prototype.cmd = function(command, args) {
+    if (this.invalid)
+    {
+      util.log('SABnzbd API invalid because of connection/API key issues');
+      return false;
+    }
+
     // build url for request
     var url = this.url + '?' + QS.stringify({
       mode    : command,
@@ -53,7 +175,8 @@
     if (args)
       url += '&' + QS.stringify(args);
 
-    //console.log('RETR', url);
+    if (this.verbose)
+      util.log("Retrieving url `" + url + "'");
 
     // perform request
     var defer = Q.defer();
@@ -75,49 +198,14 @@
 
   // get server version
   SABnzbd.prototype.version = function() {
-    return this.cmd('version').then(function(version) {
-      return version.replace(/^\s+|\s+$/, '');
+    return this.cmd('version').then(function(r) {
+      return r.version;
     });
   };
 
-  // get queue contents
-  SABnzbd.prototype.queue = function() {
-    var _this = this;
-    return this.cmd('queue').then(function(response) {
-      var queue = response.queue || { slots: [] };
-
-      // normalize queue slots
-      var slots = queue.slots.map(function(slot) {
-        return _this.normalize_queue(slot);
-      });
-      queue.entries = slots;
-
-      // done
-      return queue;
-    });
-  };
-
-  // get history contents
-  SABnzbd.prototype.history = function() {
-    var _this = this;
-
-    return this.cmd('history').then(function(response) {
-      var history = response.history || { slots: [] };
-
-      // normalize history slots
-      var slots = history.slots.map(function(slot) {
-        return _this.normalize_history(slot);
-      });
-      history.entries = slots;
-
-      // done
-      return history;
-    });
-  };
-
-  // get both queue and history contents, merged
-  SABnzbd.prototype.all = function() {
-    return Q.all([ this.queue(), this.history() ]).spread(function(queue, history) {
+  // get both queue and history status, merged
+  SABnzbd.prototype.status = function() {
+    return Q.all([ this.queue.status(), this.history.status() ]).spread(function(queue, history) {
       // merge slots
       if (! queue.slots) 
         queue.slots = [];
@@ -131,42 +219,21 @@
       return queue;
     });
   };
-
-  // add an NZB url to the queue
-  SABnzbd.prototype.addurl = function(url) {
-    return this.cmd('addurl', { name : url });
-  };
-
-  // pause/stop download of item
-  SABnzbd.prototype.pause = function(id) {
-    return this.cmd('queue', { name : 'pause', value : id });
-  };
-  SABnzbd.prototype.stop = SABnzbd.prototype.pause;
-
-  // resume/start download of item
-  SABnzbd.prototype.resume = function(id) {
-    return this.cmd('queue', { name : 'resume', value : id });
-  };
-  SABnzbd.prototype.start = SABnzbd.prototype.resume;
-
-  // remove an item from the queue
-  SABnzbd.prototype.queue_remove = function(id) {
-    return this.cmd('queue', { name : 'delete', value : id });
-  };
-
-  // remove an item from the history
-  SABnzbd.prototype.history_remove = function(id) {
-    return this.cmd('history', { name : 'delete', value : id });
-  };
-
-  // remove an item all together
-  SABnzbd.prototype.remove = function(id) {
-    return Q.all([ 
-      this.queue_remove(id), 
-      this.history_remove(id)
-    ]).spread(function(queue_status, history_status) {
-      return { status : queue_status.status || history_status.status };
+  
+  // get both queue and history entries
+  SABnzbd.prototype.entries = function() {
+    return this.status().then(function(response) {
+      return response.entries;
     });
+  };
+
+  // delete (an) item(s) from both queue and history (or pass 'all' as
+  // single argument to remove everything)
+  SABnzbd.prototype.delete = function() {
+    return Q.all([ this.queue.delete(id), this.history.delete(id) ])
+            .spread(function(queue_status, history_status) {
+              return { status : queue_status.status || history_status.status };
+            });
   };
 
   // normalize queue slot

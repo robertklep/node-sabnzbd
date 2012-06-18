@@ -53,7 +53,7 @@
     if (args)
       url += '&' + QS.stringify(args);
 
-    console.log('RETR', url);
+    //console.log('RETR', url);
 
     // perform request
     var defer = Q.defer();

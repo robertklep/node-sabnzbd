@@ -72,9 +72,11 @@
   // delete (an) item(s) from the queue (or pass 'all' as single argument
   // to remove everything from the queue)
   SABnzbdQueue.prototype.delete = function() {
+    var args = Array.prototype.slice.call(arguments);
+
     return this.delegate.cmd('queue', { 
       name  : 'delete', 
-      value : arguments.join(",")
+      value : args.join(",")
     });
   };
 
@@ -111,9 +113,11 @@
   // delete (an) item(s) from the history (or pass 'all' as single
   // argument to remove everything from the history)
   SABnzbdHistory.prototype.delete = function() {
+    var args = Array.prototype.slice.call(arguments);
+
     return this.delegate.cmd('history', { 
       name  : 'delete', 
-      value : arguments.join(",")
+      value : args.join(",")
     });
   };
 
@@ -230,10 +234,13 @@
   // delete (an) item(s) from both queue and history (or pass 'all' as
   // single argument to remove everything)
   SABnzbd.prototype.delete = function() {
-    return Q.all([ this.queue.delete(id), this.history.delete(id) ])
-            .spread(function(queue_status, history_status) {
-              return { status : queue_status.status || history_status.status };
-            });
+    return Q.all([ 
+      this.queue.delete.apply(this.queue, arguments),
+      this.history.delete.apply(this.history, arguments)
+    ])
+    .spread(function(queue_status, history_status) {
+      return { status : queue_status.status || history_status.status };
+    });
   };
 
   // normalize queue slot

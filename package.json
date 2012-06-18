@@ -1,0 +1,21 @@
+{
+  "name": "sabnzbd",
+  "description": "Node interface for SABnzbd",
+  "author": "Robert Klep <robert.klep@gmail.com>",
+  "keywords": [
+    "sabnzbd",
+    "nzb",
+    "usenet"
+  ],
+  "version": "0.0.1",
+  "main": "./sabnzbd.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/robertklep/node-sabnzbd.git"
+  },
+  "dependencies": {
+    "q": "0.8.x",
+    "request": "2.9.x"
+  },
+  "private": true
+}

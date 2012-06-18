@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "q": "0.8.x",
-    "request": "2.9.x"
+    "request": "2.9.x",
+		"dateutil": "0.1.x"
   },
   "private": true
 }

@@ -3,7 +3,7 @@ node-sabnzbd
 
 Node interface for [SABnzbd](http://www.sabnzbd.org/).
 
-**NOT PROPERLY TESTED YET!!!**
+**Not properly tested yet**
 
 TL;DR
 -----
@@ -22,8 +22,8 @@ Install
 -------
 
 * Install module first:
-    - local installation: `npm install git://github.com/robertklep/node-sabnzbd.git`
-    - global installation: `npm install git://github.com/robertklep/node-sabnzbd.git -g`
+    - local installation: `npm install sabnzbd`
+    - global installation: `npm install sabnzbd -g`
 * Get the API key from your SABnzbd:
     - open SABnzbd web interface in your browser
 		- go to `Config > General`

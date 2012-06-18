@@ -3,6 +3,8 @@ node-sabnzbd
 
 Node interface for [SABnzbd](http://www.sabnzbd.org/).
 
+**NOT FULLY TESTED YET**
+
 TL;DR
 -----
 

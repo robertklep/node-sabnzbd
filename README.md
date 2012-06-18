@@ -13,10 +13,10 @@ var SABnzbd = require('sabnzbd');
 var sabnzbd = new SABnzbd('http://localhost:8080/', API_KEY);
 
 console.log('Queue + History:');
-sabnzbd.all().then(function(queue) {
-	queue.entries.forEach(function(slot) {
-		console.log('-', slot.name, ',', slot.size / 1000 / 1000, 'MB');
-	});
+sabnzbd.entries().then(function(entries) {
+  entries.forEach(function(entry) {
+    console.log('-', entry.name, ',', entry.size / 1000 / 1000, 'MB');
+  });
 });
 ```
 
@@ -28,20 +28,26 @@ Install
     - global installation: `npm install sabnzbd -g`
 * Get the API key from your SABnzbd:
     - open SABnzbd web interface in your browser
-		- go to `Config > General`
-		- in the _SABnzbd Web Server_ settings, find the API key (or generate
-			one)
-		- note down the API key, you'll need it
+    - go to `Config > General`
+    - in the _SABnzbd Web Server_ settings, find the API key (or generate
+    one)
+    - note down the API key, you'll need it
 
 API basics
 ----------
+
+This API consists of three parts:
+* the 'global' API
+* methods related to the SABnzbd queue (the list of currently active
+downloads)
+* methods related to the SABnzbd history (the list of downloaded NZB's)
 
 For the most part, the API implements the commands found on [the SABnzbd
 API page](http://wiki.sabnzbd.org/api), and returns their results pretty
 much as-is.
 
 However, because the SABnzbd API is horribly inconsistent at times, I've
-added some normalization (see `queue` and `history` commands) to make
+added some normalization (see the `status` and `entries` commands) to make
 interfacing with it a bit easier. Another thing is that the SABnzbd API is
 not terribly informative on the status of some commands; for instance, the
 `remove` commands will always return a `true` status, even if you're using
@@ -62,55 +68,115 @@ to the mix:
 var Q = require('q');
 
 sabnzbd
-	.addurl(URL)
-	.then(function(r) {
-		if (r.status == false)
-			// addurl failed, bail...
-			throw new Error("Something went wrong adding the url");
-		else
-			// delay for 2 seconds before getting the queue
-			return Q.delay(2000);
-	});
-	.then(function() {
-		return sabnzbd.queue()
-	})
-	.then(function(queue) {
-		// ... do something with the queue contents
-	})
-	.fail(function(error) {
-		console.log('Something went wrong!', error);
-	});
+  .queue.addurl(URL)
+  .then(function(r) {
+    if (r.status == false)
+      // addurl failed, bail...
+      throw new Error("Something went wrong adding the url");
+    else
+      // delay for 2 seconds before getting the queue
+      return Q.delay(2000);
+  });
+  .then(function() {
+    return sabnzbd.queue.entries();
+  })
+  .then(function(queue) {
+    // ... do something with the queue entries
+  })
+  .fail(function(error) {
+    console.log('Something went wrong!', error);
+  });
 ```
 
-Unless otherwise stated, all commands pass an object containing
-a `status` property as first argument to your callbacks.
+Unless otherwise stated, all commands pass an object containing a `status`
+property as first argument to your callbacks.
 
 API
 ---
 
-* `new SABnzbd(URL, API_KEY)`
+### Global commands
 
-    Connects to SABnzbd. It will automatically perform a quick check to
-    determine the SABnzbd version and to see if your API key is valid.
+#### `new SABnzbd(URL, API_KEY)`
+
+* Connects to SABnzbd. It will automatically perform a quick check to
+  determine the SABnzbd version and to see if your API key is valid.
     
-    Arguments:
+    _Arguments_:
     
-    * `URL`: url to web interface of the SABnzbd
-    * `API_KEY`: API key (required for most operations, see _Install_ on how to
-    	get it)
+    * `URL`
+        - url to web interface of the SABnzbd
+    * `API_KEY`
+        - API key (required for most operations, see _Install_ on how to get it)
     
-    Returns:
+    _Returns_:
     
     * an `SABnzbd` instance
 
-* `instance.queue()`
+#### `instance.status()`
 
-    Get contents of the SABnzbd queue.
+* The results of `queue.status()` and `history.status()` (see below),
+  merged (**NB**: for now, only the `slots` and `entries` are actually
+  merged, the rest of the object returned is based on the object returned
+  by the `queue.status()` method).
+
+#### `instance.entries()`
+
+* The results of `queue.entries()` and `history.entries()` (see below),
+  merged.
+
+#### `instance.delete(ID[, ID, ...])`
+ 
+* Delete an NZB from both queue and history.
+
+    _Arguments_:
+
+    * `ID`
+        - id of NZB (the `nzbid` property of queue/history entries)
+
+    Accepts multiple `ID` arguments, or one argument containing the string
+    `all` to remove everything from both queue and history (so be careful!).
+
+#### `instance.version()`
+
+* Query the SABnzbd version.
+
+    _Returns_:
+
+    * the SABnzbd version as reported by the server
+
+#### `instance.cmd(CMD[, ARGS])`
+
+* Send a command to the SABnzbd.
+
+    _Arguments_:
+
+    * `CMD`
+        - command to send
+    * `ARGS`
+        - optional object of _key/value_ parameters
+
+    (for all commands and their arguments, check the [the SABnzbd
+    API page](http://wiki.sabnzbd.org/api))
+
+    For example, the `version()` method is implemented like this:
+
+    ```javascript
+    return this.cmd('version');
+    ```
+
+### Queue-related commands
+
+#### `instance.queue.status()`
+
+* Get status of the SABnzbd queue.
+
+    _Returns_:
+
+    * the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
+      with an extra property `entries` containing a normalized version of
+      the `slots` property
     
-    Provides the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
-    with an extra property `entries` containing a normalized version of the `slots` property:
-    
-    An entry contains the following properties:
+    A queue entry contains the following properties:
     
         age         : age of NZB posting, in seconds
         size        : size of download in bytes
@@ -128,12 +194,55 @@ API
                       'Failed', 'Verifying', 'Downloading', 'Extracting')
         time_left   : time left before download should be complete, in seconds
 
-* `instance.history()`
+#### `instance.queue.entries()`
 
-    Get contents of the SABnzbd history.
+* Get just the `entries` property from the queue.
+
+#### `instance.queue.delete(ID)`
+
+* Delete an NZB from the queue. See `instance.delete()` for arguments.
+
+#### `instance.queue.addurl(URL)`
+
+* Add an NZB to the queue by URL.
     
-    Provides the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
-    with, again, an extra `entries` property:
+    _Arguments_:
+    
+    * `URL`
+        - url pointing to an NZB file
+
+#### `instance.queue.pause([ID])`
+
+* Pause downloading. Without arguments, pauses the entire queue. Otherwise,
+  just pauses downloading of a single NZB.
+    
+    _Arguments_:
+    
+    * `ID`
+        - id of NZB (the `nzbid` property of queue/history entries)
+
+#### `instance.queue.resume([ID])`
+
+* Resume downloading. Without arguments, resumes the entire queue.
+  Otherwise, just resumes downloading of a single NZB.
+    
+    _Arguments_:
+    
+    * `ID`
+        - id of NZB (the `nzbid` property of queue/history entries)
+
+### History-related commands
+
+#### `instance.history.status()`
+
+* Get status of the SABnzbd history.
+    
+    _Returns_:
+
+    * the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
+      with, again, an extra `entries` property
+
+    A history entry contains the following properties:
     
         action_line    : ?
         size           : size in bytes
@@ -165,84 +274,23 @@ API
         url            : ?
         url_info       : ?
 
-* `instance.all()`
+#### `instance.history.entries()`
 
-    Provides the contents of both the `queue` and `history` commands combined
-    (**NB**: for now, only the `slots` and `entries` are actually merged, the
-    rest of the object returned is based on the object returned by the `queue`
-    command).
+* Get just the `entries` property from the queue.
 
-* `instance.addurl(URL)`
+#### `instance.history.delete(ID)`
 
-    Add an NZB to the queue by URL.
-    
-    Arguments:
-    
-    * `URL`: url pointing to an NZB file
+* Delete an NZB from the history. See `instance.delete()` for arguments.
 
-* `instance.pause(ID)`
+Changelog
+---------
 
-    Pause downloading of an NZB.
-    
-    Arguments:
-    
-    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-* `instance.stop(ID)`
-
-    Alias for `instance.pause(ID)`
-
-* `instance.resume(ID)`
-
-    Resume/start downloading of an NZB.
-    
-    Arguments:
-    
-    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-* `instance.start(ID)`
-
-    Alias for `instance.resume(ID)`
-
-* `instance.queue_remove(ID)`
-    
-    Remove an NZB from the queue.
-    
-    Arguments:
-    
-    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-* `instance.history_remove(ID)`
-
-    Remove an NZB from the history.
-    
-    Arguments:
-    
-    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-* `instance.remove(ID)`
-
-    Remove an NZB from both queue and/or history.
-
-## Internal API
-
-* `instance.cmd(CMD[, ARGS])`
-
-    Send a command to the SABnzbd.
-    
-    Arguments:
-    
-    * `CMD`: command to send
-    * `ARGS`: optional object of _key/value_ parameters
-    
-    (for all commands and their arguments, check the [the SABnzbd
-    API page](http://wiki.sabnzbd.org/api))
-    
-    For example, the `instance.addurl()` method is implemented as such:
-    
-    ```javascript
-		return this.cmd('addurl', { name : url });
-    ```
+* **0.2.0**
+    * pretty much a rewrite of the API
+* **0.1.1**
+    * removed some left-over debugging code
+* **0.1.0**
+    * initial release
 
 TODO
 ----
@@ -257,3 +305,4 @@ TODO
     - Retry
 * Configuration:
     - Everything
+

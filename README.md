@@ -40,11 +40,14 @@ much as-is.
 
 However, because the SABnzbd API is horribly inconsistent at times, I've
 added some normalization (see `queue` and `history` commands) to make
-interfacing with it a bit easier.
+interfacing with it a bit easier. Another thing is that the SABnzbd API is
+not terribly informative on the status of some commands; for instance, the
+`remove` commands will always return a `true` status, even if you're using
+an nonexistent NZB id.
 
-SABnzbd has two main lists: the queue and the history. The queue contains
-all active downloads (the ones that haven't finished yet), the history
-contains all completed downloads.
+FWIW: SABnzbd has two main lists: the queue and the history. The queue
+contains all active downloads (the ones that haven't finished yet), the
+history contains all completed downloads.
 
 `sabnzbd` uses [Kris Kowal's `q` library](https://github.com/kriskowal/q),
 which means that most commands return a promise.

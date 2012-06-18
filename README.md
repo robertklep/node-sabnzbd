@@ -240,9 +240,9 @@ API
     
     For example, the `instance.addurl()` method is implemented as such:
     
-		```javascript
+    ```javascript
 		return this.cmd('addurl', { name : url });
-		```
+    ```
 
 TODO
 ----

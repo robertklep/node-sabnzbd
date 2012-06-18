@@ -53,7 +53,7 @@
     if (args)
       url += '&' + QS.stringify(args);
 
-    //console.log('RETR', url);
+    console.log('RETR', url);
 
     // perform request
     var defer = Q.defer();
@@ -161,10 +161,12 @@
 
   // remove an item all together
   SABnzbd.prototype.remove = function(id) {
-    return Q.all([
-      this.queue_remove(id),
-      this.history_remove(id),
-    ]);
+    return Q.all([ 
+      this.queue_remove(id), 
+      this.history_remove(id)
+    ]).spread(function(queue_status, history_status) {
+      return { status : queue_status.status || history_status.status };
+    });
   };
 
   // normalize queue slot

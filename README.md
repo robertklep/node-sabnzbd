@@ -8,15 +8,17 @@ Node interface for [SABnzbd](http://www.sabnzbd.org/).
 TL;DR
 -----
 
-    var SABnzbd = require('sabnzbd');
-    var sabnzbd = new SABnzbd('http://localhost:8080/', API_KEY);
+```javascript
+var SABnzbd = require('sabnzbd');
+var sabnzbd = new SABnzbd('http://localhost:8080/', API_KEY);
 
-    console.log('Queue + History:');
-    sabnzbd.all().then(function(queue) {
-      queue.entries.forEach(function(slot) {
-        console.log('-', slot.name, ',', slot.size / 1000 / 1000, 'MB');
-      });
-    });
+console.log('Queue + History:');
+sabnzbd.all().then(function(queue) {
+	queue.entries.forEach(function(slot) {
+		console.log('-', slot.name, ',', slot.size / 1000 / 1000, 'MB');
+	});
+});
+```
 
 Install
 -------
@@ -49,32 +51,36 @@ an nonexistent NZB id.
 which means that most commands return a promise. Use `.then(CALLBACK)` to
 wait for, and read, the results:
 
-    sabnzbd.addurl(URL).then(YOUR_CALLBACK)
+```javascript
+sabnzbd.addurl(URL).then(YOUR_CALLBACK)
+```
 
 If you're more adventurous, you can chain commands and add some `q` magic
 to the mix:
 
-    var Q = require('q');
+```javascript
+var Q = require('q');
 
-    sabnzbd
-      .addurl(URL)
-      .then(function(r) {
-        if (r.status == false)
-          // addurl failed, bail...
-          throw new Error("Something went wrong adding the url");
-        else
-          // delay for 2 seconds before getting the queue
-          return Q.delay(2000);
-      });
-      .then(function() {
-        return sabnzbd.queue()
-      })
-      .then(function(queue) {
-        // ... do something with the queue contents
-      })
-      .fail(function(error) {
-        console.log('Something went wrong!', error);
-      });
+sabnzbd
+	.addurl(URL)
+	.then(function(r) {
+		if (r.status == false)
+			// addurl failed, bail...
+			throw new Error("Something went wrong adding the url");
+		else
+			// delay for 2 seconds before getting the queue
+			return Q.delay(2000);
+	});
+	.then(function() {
+		return sabnzbd.queue()
+	})
+	.then(function(queue) {
+		// ... do something with the queue contents
+	})
+	.fail(function(error) {
+		console.log('Something went wrong!', error);
+	});
+```
 
 Unless otherwise stated, all commands pass an object containing
 a `status` property as first argument to your callbacks.

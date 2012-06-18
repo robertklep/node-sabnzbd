@@ -6,7 +6,7 @@
     "email" : "robert.klep@gmail.com"
   },
   "keywords": [ "sabnzbd", "nzb", "usenet" ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "sabnzbd.js",
   "repository": {
     "type": "git",

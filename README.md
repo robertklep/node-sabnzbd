@@ -88,159 +88,161 @@ a `status` property as first argument to your callbacks.
 API
 ---
 
-### `new SABnzbd(URL, API_KEY)`
+* `new SABnzbd(URL, API_KEY)`
 
-Connects to SABnzbd. It will automatically perform a quick check to
-determine the SABnzbd version and to see if your API key is valid.
+    Connects to SABnzbd. It will automatically perform a quick check to
+    determine the SABnzbd version and to see if your API key is valid.
+    
+    Arguments:
+    
+    * `URL`: url to web interface of the SABnzbd
+    * `API_KEY`: API key (required for most operations, see _Install_ on how to
+    	get it)
+    
+    Returns:
+    
+    * an `SABnzbd` instance
 
-Arguments:
+* `instance.queue()`
 
-* `URL`: url to web interface of the SABnzbd
-* `API_KEY`: API key (required for most operations, see _Install_ on how to
-	get it)
+    Get contents of the SABnzbd queue.
+    
+    Provides the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
+    with an extra property `entries` containing a normalized version of the `slots` property:
+    
+    An entry contains the following properties:
+    
+        age         : age of NZB posting, in seconds
+        size        : size of download in bytes
+        size_left   : number of bytes still to download before completion
+        nzbid       : internal SABnzbd id for this NZB
+        category    : categories
+        eta         : ETA for download, as Date object
+        name        : NZB filename
+        nzbname     : NZB filename
+        percentage  : percentage downloaded
+        index       : index into queue
+        missing     : ?
+        priority    : ?
+        status      : download status ('Completed', 'Paused', 'Queued,
+                      'Failed', 'Verifying', 'Downloading', 'Extracting')
+        time_left   : time left before download should be complete, in seconds
 
-Returns:
+* `instance.history()`
 
-* an `SABnzbd` instance
+    Get contents of the SABnzbd history.
+    
+    Provides the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
+    with, again, an extra `entries` property:
+    
+        action_line    : ?
+        size           : size in bytes
+        category       : categories
+        completed      : completed timestamp, as Date object
+        completeness   : ?
+        download_time  : download time in seconds
+        downloaded     : number of downloaded bytes
+        fail_message   : message why download failed
+        id             : internal id (not the same as `nzbid`)
+        loaded         : ?
+        meta           : ?
+        name           : name of download
+        nzbname        : NZB filename
+        nzbid          : internal SABnzbd id for this NZB
+        incomplete_path: path where SABnzbd stored incomplete download
+        postproc_time  : time in seconds it took to postprocess this NZB
+        pp             : ?
+        report         : ?
+        retry          : ?
+        script         : ?
+        script_line    : ?
+        script_log     : ?
+        show_details   : ?
+        stage_log      : list of actions taken by SABnzbd to download/process
+                         this NZB
+        status         : status (see above)
+        downloaded_to  : file/directory this NZB was downloaded to
+        url            : ?
+        url_info       : ?
 
-### `instance.queue()`
+* `instance.all()`
 
-Get contents of the SABnzbd queue.
+    Provides the contents of both the `queue` and `history` commands combined
+    (**NB**: for now, only the `slots` and `entries` are actually merged, the
+    rest of the object returned is based on the object returned by the `queue`
+    command).
 
-Provides the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8),
-with an extra property `entries` containing a normalized version of the `slots` property:
+* `instance.addurl(URL)`
 
-An entry contains the following properties:
+    Add an NZB to the queue by URL.
+    
+    Arguments:
+    
+    * `URL`: url pointing to an NZB file
 
-    age         : age of NZB posting, in seconds
-    size        : size of download in bytes
-    size_left   : number of bytes still to download before completion
-    nzbid       : internal SABnzbd id for this NZB
-    category    : categories
-    eta         : ETA for download, as Date object
-    name        : NZB filename
-    nzbname     : NZB filename
-    percentage  : percentage downloaded
-    index       : index into queue
-    missing     : ?
-    priority    : ?
-    status      : download status ('Completed', 'Paused', 'Queued,
-                  'Failed', 'Verifying', 'Downloading', 'Extracting')
-    time_left   : time left before download should be complete, in seconds
+* `instance.pause(ID)`
 
-### `instance.history()`
+    Pause downloading of an NZB.
+    
+    Arguments:
+    
+    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
 
-Get contents of the SABnzbd history.
+* `instance.stop(ID)`
 
-Provides the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
-with, again, an extra `entries` property:
+    Alias for `instance.pause(ID)`
 
-    action_line    : ?
-    size           : size in bytes
-    category       : categories
-    completed      : completed timestamp, as Date object
-    completeness   : ?
-    download_time  : download time in seconds
-    downloaded     : number of downloaded bytes
-    fail_message   : message why download failed
-    id             : internal id (not the same as `nzbid`)
-    loaded         : ?
-    meta           : ?
-    name           : name of download
-    nzbname        : NZB filename
-    nzbid          : internal SABnzbd id for this NZB
-    incomplete_path: path where SABnzbd stored incomplete download
-    postproc_time  : time in seconds it took to postprocess this NZB
-    pp             : ?
-    report         : ?
-    retry          : ?
-    script         : ?
-    script_line    : ?
-    script_log     : ?
-    show_details   : ?
-    stage_log      : list of actions taken by SABnzbd to download/process
-                     this NZB
-    status         : status (see above)
-    downloaded_to  : file/directory this NZB was downloaded to
-    url            : ?
-    url_info       : ?
+* `instance.resume(ID)`
 
-### `instance.all()`
+    Resume/start downloading of an NZB.
+    
+    Arguments:
+    
+    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
 
-Provides the contents of both the `queue` and `history` commands combined
-(**NB**: for now, only the `slots` and `entries` are actually merged, the
-rest of the object returned is based on the object returned by the `queue`
-command).
+* `instance.start(ID)`
 
-### `instance.addurl(URL)`
+    Alias for `instance.resume(ID)`
 
-Add an NZB to the queue by URL.
+* `instance.queue_remove(ID)`
+    
+    Remove an NZB from the queue.
+    
+    Arguments:
+    
+    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
 
-Arguments:
+* `instance.history_remove(ID)`
 
-* `URL`: url pointing to an NZB file
+    Remove an NZB from the history.
+    
+    Arguments:
+    
+    * `ID`: id of NZB (the `nzbid` property of queue/history entries)
 
-### `instance.pause(ID)`
+* `instance.remove(ID)`
 
-Pause downloading of an NZB.
-
-Arguments:
-
-* `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-### `instance.stop(ID)`
-
-Alias for `instance.pause(ID)`
-
-### `instance.resume(ID)`
-
-Resume/start downloading of an NZB.
-
-Arguments:
-
-* `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-### `instance.start(ID)`
-
-Alias for `instance.resume(ID)`
-
-### `instance.queue_remove(ID)`
-
-Remove an NZB from the queue.
-
-Arguments:
-
-* `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-### `instance.history_remove(ID)`
-
-Remove an NZB from the history.
-
-Arguments:
-
-* `ID`: id of NZB (the `nzbid` property of queue/history entries)
-
-### `instance.remove(ID)`
-
-Remove an NZB from both queue and/or history.
+    Remove an NZB from both queue and/or history.
 
 ## Internal API
 
-### `instance.cmd(CMD[, ARGS])`
+* `instance.cmd(CMD[, ARGS])`
 
-Send a command to the SABnzbd.
-
-Arguments:
-
-* `CMD`: command to send
-* `ARGS`: optional object of _key/value_ parameters
-
-(for all commands and their arguments, check the [the SABnzbd
-API page](http://wiki.sabnzbd.org/api))
-
-For example, the `instance.addurl()` method is implemented as such:
-
-    return this.cmd('addurl', { name : url });
+    Send a command to the SABnzbd.
+    
+    Arguments:
+    
+    * `CMD`: command to send
+    * `ARGS`: optional object of _key/value_ parameters
+    
+    (for all commands and their arguments, check the [the SABnzbd
+    API page](http://wiki.sabnzbd.org/api))
+    
+    For example, the `instance.addurl()` method is implemented as such:
+    
+		```javascript
+		return this.cmd('addurl', { name : url });
+		```
 
 TODO
 ----

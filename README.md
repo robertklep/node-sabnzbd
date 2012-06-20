@@ -40,7 +40,7 @@ This API consists of three parts:
 * the 'global' API
 * methods related to the SABnzbd queue (the list of currently active
 downloads)
-* methods related to the SABnzbd history (the list of downloaded NZB's)
+* methods related to the SABnzbd history (the list of completed downloads)
 
 For the most part, the API implements the commands found on [the SABnzbd
 API page](http://wiki.sabnzbd.org/api), and returns their results pretty
@@ -58,7 +58,7 @@ which means that most commands return a promise. Use `.then(CALLBACK)` to
 wait for, and read, the results:
 
 ```javascript
-sabnzbd.addurl(URL).then(YOUR_CALLBACK)
+sabnzbd.queue.addurl(URL).then(YOUR_CALLBACK)
 ```
 
 If you're more adventurous, you can chain commands and add some `q` magic
@@ -74,6 +74,7 @@ sabnzbd
       // addurl failed, bail...
       throw new Error("Something went wrong adding the url");
     else
+      // downloading and queueing the NZB might take a short while, so
       // delay for 2 seconds before getting the queue
       return Q.delay(2000);
   });
@@ -176,7 +177,7 @@ API
       with an extra property `entries` containing a normalized version of
       the `slots` property
     
-    A queue entry contains the following properties:
+    A normalized queue entry contains the following properties:
     
         age         : age of NZB posting, in seconds
         size        : size of download in bytes
@@ -242,7 +243,7 @@ API
     * the output of the [history command](http://wiki.sabnzbd.org/api#toc11),
       with, again, an extra `entries` property
 
-    A history entry contains the following properties:
+    A normalized history entry contains the following properties:
     
         action_line    : ?
         size           : size in bytes
@@ -269,7 +270,7 @@ API
         show_details   : ?
         stage_log      : list of actions taken by SABnzbd to download/process
                          this NZB
-        status         : status (see above)
+        status         : status (see queue entry)
         downloaded_to  : file/directory this NZB was downloaded to
         url            : ?
         url_info       : ?

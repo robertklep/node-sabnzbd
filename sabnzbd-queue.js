@@ -93,6 +93,7 @@
 
     // return a normalized object
     return {
+      _queue_slot : true,
       age         : parseInt(age),
       size        : slot.mb * 1000 * 1000,
       size_left   : slot.mbleft * 1000 * 1000,

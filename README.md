@@ -194,6 +194,7 @@ API
         status      : download status ('Completed', 'Paused', 'Queued,
                       'Failed', 'Verifying', 'Downloading', 'Extracting')
         time_left   : time left before download should be complete, in seconds
+        _queue_slot : boolean (always true) to identify this as a queue entry
 
 #### `instance.queue.entries()`
 
@@ -274,6 +275,7 @@ API
         downloaded_to  : file/directory this NZB was downloaded to
         url            : ?
         url_info       : ?
+        _history_slot  : boolean (always true) to identify this as a history entry
 
 #### `instance.history.entries()`
 

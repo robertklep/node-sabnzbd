@@ -44,6 +44,7 @@
   // normalize history slot
   SABnzbdHistory.prototype.normalize = function(slot) {
     return {
+      _history_slot   : true,
       action_line     : slot.action_line,
       size            : slot.bytes,
       category        : slot.category,

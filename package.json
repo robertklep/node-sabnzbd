@@ -2,21 +2,25 @@
   "name": "sabnzbd",
   "description": "Node interface for SABnzbd",
   "author": {
-    "name" : "Robert Klep",
-    "email" : "robert.klep@gmail.com"
+    "name": "Robert Klep",
+    "email": "robert.klep@gmail.com"
   },
-  "keywords": [ "sabnzbd", "nzb", "usenet" ],
-  "version": "0.2.1",
+  "keywords": [
+    "sabnzbd",
+    "nzb",
+    "usenet"
+  ],
+  "version": "0.3.0",
   "main": "sabnzbd.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/robertklep/node-sabnzbd.git"
   },
-  "homepage" : "https://github.com/robertklep/node-sabnzbd",
+  "homepage": "https://github.com/robertklep/node-sabnzbd",
   "dependencies": {
-    "q": "0.8.x",
-    "request": "2.9.x",
-		"dateutil": "0.1.x"
+    "q": "~0.8.12",
+    "request": "~2.9.203",
+    "dateutil": "0.1.x"
   },
   "bugs": {
     "email": "robert.klep+node-sabnzbd@gmail.com",

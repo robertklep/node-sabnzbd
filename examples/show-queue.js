@@ -1,17 +1,15 @@
 var SABnzbd = require('../lib/sabnzbd');
-var sabnzbd = new SABnzbd(
-	'http://192.168.23.12:9092/',
-	'0d639867d1b8b3b9466d6712e521e6d5'
-);
-/*
-var sabnzbd = new SABnzbd(
-	'http://127.0.0.1:8080/',
-	'3c83bf20ea9696ec49b99163e362620b',
-  true);
-*/
 
-var Q = require('q');
+// Check command line.
+if (process.argv.length != 4) {
+  console.error('Use: %s API_URL API_KEY', process.argv[1].replace(/^.*\//, ''));
+  process.exit(1);
+}
 
+// Instantiate handler.
+var sabnzbd = new SABnzbd(process.argv[2], process.argv[3]);
+
+// Load a list of history and queued items.
 console.log('Queue + History:');
 sabnzbd.entries().then(function(entries) {
   entries.forEach(function(entry) {

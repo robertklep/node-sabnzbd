@@ -1,4 +1,4 @@
-var SABnzbd = require('sabnzbd');
+var SABnzbd = require('../lib/sabnzbd');
 var sabnzbd = new SABnzbd(
 	'http://192.168.23.12:9092/',
 	'0d639867d1b8b3b9466d6712e521e6d5'

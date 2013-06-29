@@ -11,7 +11,7 @@
     "usenet"
   ],
   "version": "0.3.0",
-  "main": "sabnzbd.js",
+  "main": "lib/sabnzbd.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/robertklep/node-sabnzbd.git"

@@ -18,9 +18,10 @@
   },
   "homepage": "https://github.com/robertklep/node-sabnzbd",
   "dependencies": {
-    "q": "~0.8.12",
-    "request": "~2.9.203",
-    "dateutil": "0.1.x"
+    "bluebird": "^2.10.2",
+    "dateutil": "^0.1.0",
+    "debug": "^2.2.0",
+    "request": "^2.64.0"
   },
   "bugs": {
     "email": "robert.klep+node-sabnzbd@gmail.com",

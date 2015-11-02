@@ -143,7 +143,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
 * Delete an NZB from the queue. See `instance.delete()` for arguments.
 
-#### `instance.queue.addurl(URL | ARGS)`
+#### `instance.queue.addurl(URL[, ARGS)`
 
 * Add an NZB to the queue by URL. Or an ARGS object.
     
@@ -152,7 +152,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
     * `URL`
         - url pointing to an NZB file
     * `ARGS` [Sab API Docs](http://wiki.sabnzbd.org/api#toc28)
-        - Object containing at least `name`=URL and any of the following options `pp`=Post Process Level, `script`=Post Process Script, `cat`=Category, `priority`=Priority
+        - Optional object any of the following options `pp`=Post Process Level, `script`=Post Process Script, `cat`=Category, `priority`=Priority
 
 #### `instance.queue.pause([ID])`
 

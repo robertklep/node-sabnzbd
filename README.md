@@ -48,16 +48,16 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 #### `new SABnzbd(URL, API_KEY)`
 
 * Connects to SABnzbd. It will automatically perform a quick check to determine the SABnzbd version and to see if your API key is valid.
-    
+
     _Arguments_:
-    
+
     * `URL`
         - url to web interface of the SABnzbd
     * `API_KEY`
         - API key (required for most operations, see _Install_ on how to get it)
-    
+
     _Returns_:
-    
+
     * an `SABnzbd` instance
 
 #### `instance.status()`
@@ -69,7 +69,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 * The results of `queue.entries()` and `history.entries()` (see below), merged.
 
 #### `instance.delete(ID[, ID, ...])`
- 
+
 * Delete an NZB from both queue and history.
 
     _Arguments_:
@@ -115,9 +115,9 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
     _Returns_:
 
     * the output of the [advanced queue command](http://wiki.sabnzbd.org/api#toc8), with an extra property `entries` containing a normalized version of the `slots` property
-    
+
     A normalized queue entry contains the following properties:
-    
+
         age         : age of NZB posting, in seconds
         size        : size of download in bytes
         size_left   : number of bytes still to download before completion
@@ -145,10 +145,10 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
 #### `instance.queue.addurl(URL[, ARGS)`
 
-* Add an NZB to the queue by URL. Or an ARGS object.
-    
+* Add an NZB to the queue by URL, with optional arguments.
+
     _Arguments_:
-    
+
     * `URL`
         - url pointing to an NZB file
     * `ARGS` [Sab API Docs](http://wiki.sabnzbd.org/api#toc28)
@@ -157,18 +157,18 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 #### `instance.queue.pause([ID])`
 
 * Pause downloading. Without arguments, pauses the entire queue. Otherwise, just pauses downloading of a single NZB.
-    
+
     _Arguments_:
-    
+
     * `ID`
         - id of NZB (the `nzbid` property of queue/history entries)
 
 #### `instance.queue.resume([ID])`
 
 * Resume downloading. Without arguments, resumes the entire queue. Otherwise, just resumes downloading of a single NZB.
-    
+
     _Arguments_:
-    
+
     * `ID`
         - id of NZB (the `nzbid` property of queue/history entries)
 
@@ -177,13 +177,13 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 #### `instance.history.status()`
 
 * Get status of the SABnzbd history.
-    
+
     _Returns_:
 
     * the output of the [history command](http://wiki.sabnzbd.org/api#toc11), with, again, an extra `entries` property
 
     A normalized history entry contains the following properties:
-    
+
         action_line    : ?
         size           : size in bytes
         category       : categories
@@ -226,6 +226,8 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 Changelog
 ---------
 
+* **1.2.0**
+    * allow passing of parameters with `addurl()` (thanks to @OverFlow636)
 * **1.0.0**
     * dropped Q in favor of Bluebird, tightened up code
 * **0.2.0**

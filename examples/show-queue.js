@@ -1,4 +1,4 @@
-var SABnzbd = require('../lib/sabnzbd');
+const SABnzbd = require('..');
 
 // Check command line.
 if (process.argv.length != 4) {
@@ -7,15 +7,19 @@ if (process.argv.length != 4) {
 }
 
 // Instantiate handler.
-var sabnzbd = SABnzbd(process.argv[2], process.argv[3]);
+const sabnzbd = SABnzbd(process.argv[2], process.argv[3]);
 
 // Load a list of history and queued items.
 console.log('Queue + History:');
-sabnzbd.entries().each(function(entry) {
-  console.log('-', 
-    entry.name, 
-    entry.size / 1000 / 1000, 'MB', 
-    entry.status,
-    entry._history_slot ? 'H' : 'Q'
-  );
+sabnzbd.entries().then(function(entries) {
+  entries.forEach(entry => {
+    console.log('-',
+      entry.name,
+      entry.size / 1000 / 1000, 'MB',
+      entry.status,
+      entry._history_slot ? 'H' : 'Q'
+    );
+  });
+}).catch(e => {
+  console.log('Error', e);
 });

@@ -1,5 +1,4 @@
-var Promise = require('bluebird');
-var SABnzbd = require('../lib/sabnzbd');
+const SABnzbd = require('..');
 
 // Check command line.
 if (process.argv.length != 4) {
@@ -8,7 +7,7 @@ if (process.argv.length != 4) {
 }
 
 // Instantiate handler.
-var sabnzbd = SABnzbd(process.argv[2], process.argv[3]);
+const sabnzbd = SABnzbd(process.argv[2], process.argv[3]);
 
 // Toggle queue status
 sabnzbd.queue.status().then(function(status) {
@@ -21,7 +20,7 @@ sabnzbd.queue.status().then(function(status) {
   }
 }).then(function() {
   console.log('waiting a bit');
-  return Promise.delay(2000);
+  return new Promise(resolve => setTimeout(resolve, 2000));
 }).then(function() {
   return sabnzbd.queue.status();
 }).then(function(status) {

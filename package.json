@@ -10,18 +10,17 @@
     "nzb",
     "usenet"
   ],
-  "version": "1.3.0",
-  "main": "lib/sabnzbd.js",
+  "version": "2.0.0",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/robertklep/node-sabnzbd.git"
   },
   "homepage": "https://github.com/robertklep/node-sabnzbd",
   "dependencies": {
-    "bluebird": "^3.5.1",
     "dateutil": "^0.1.0",
     "debug": "^3.1.0",
-    "request": "^2.83.0"
+    "node-fetch": "^1.7.3"
   },
   "bugs": {
     "email": "robert.klep+node-sabnzbd@gmail.com",

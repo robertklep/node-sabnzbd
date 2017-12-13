@@ -21,7 +21,7 @@
     "bluebird": "^3.5.1",
     "dateutil": "^0.1.0",
     "debug": "^3.1.0",
-    "request": "^2.83.0"
+    "got": "^7"
   },
   "bugs": {
     "email": "robert.klep+node-sabnzbd@gmail.com",

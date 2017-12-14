@@ -1,4 +1,4 @@
-const fetch    = require('node-fetch');
+const got      = require('got');
 const debug    = require('debug')('sabnzbd');
 const url      = require('url');
 const qs       = require('querystring');
@@ -229,7 +229,7 @@ class SABnzbd {
     debug('Retrieving url `' + url + '`');
 
     // Perform request.
-    return fetch(url).then(res => res.json());
+    return got(url, { json : true }).then(res => res.body);
   }
 
 }

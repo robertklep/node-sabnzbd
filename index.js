@@ -234,4 +234,4 @@ class SABnzbd {
 
 }
 
-module.exports = (url, apiKey) => new SABnzbd(url, apiKey);
+module.exports = SABnzbd;

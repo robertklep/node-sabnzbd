@@ -5,8 +5,8 @@ Node API client for [SABnzbd](http://www.sabnzbd.org/).
 ## TL;DR
 
 ```javascript
-var SABnzbd = require('sabnzbd');
-var sabnzbd = SABnzbd('http://localhost:8080/', API_KEY);
+const SABnzbd = require('sabnzbd');
+const sabnzbd = new SABnzbd('http://localhost:8080/', API_KEY);
 
 console.log('Queue + History:');
 sabnzbd.entries().each(function(entry) {
@@ -39,7 +39,7 @@ For the most part, the client implements the commands found on [the SABnzbd API 
 
 However, because the SABnzbd API is horribly inconsistent at times, I've added some normalization (see the `status` and `entries` commands) to make interfacing with it a bit easier. Another thing is that the SABnzbd API is not terribly informative on the status of some commands; for instance, the `remove` commands will always return a `true` status, even if you're using an nonexistent NZB id.
 
-`sabnzbd` uses the [Bluebird promise library](https://github.com/petkaantonov/bluebird), which means that all commands return a promise.
+`sabnzbd` is `Promise` based, so all commands return a promise.
 
 ## Commands
 
@@ -47,7 +47,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
 #### `new SABnzbd(URL, API_KEY)`
 
-* Connects to SABnzbd. It will automatically perform a quick check to determine the SABnzbd version and to see if your API key is valid.
+* Connects to SABnzbd.
 
     _Arguments_:
 
@@ -58,7 +58,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
     _Returns_:
 
-    * an `SABnzbd` instance
+    * a `SABnzbd` instance
 
 #### `instance.status()`
 
@@ -66,7 +66,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
 #### `instance.entries()`
 
-* The results of `queue.entries()` and `history.entries()` (see below), merged.
+* Both the history and queue entries, merged.
 
 #### `instance.delete(ID[, ID, ...])`
 
@@ -89,7 +89,7 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 
 #### `instance.cmd(CMD[, ARGS])`
 
-* Send a command to the SABnzbd.
+* Send a command to SABnzbd.
 
     _Arguments_:
 
@@ -134,10 +134,6 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
                       'Failed', 'Verifying', 'Downloading', 'Extracting')
         time_left   : time left before download should be complete, in seconds
         _queue_slot : boolean (always true) to identify this as a queue entry
-
-#### `instance.queue.entries()`
-
-* Get just the `entries` property from the queue.
 
 #### `instance.queue.delete(ID)`
 
@@ -215,10 +211,6 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
         url_info       : ?
         _history_slot  : boolean (always true) to identify this as a history entry
 
-#### `instance.history.entries()`
-
-* Get just the `entries` property from the queue.
-
 #### `instance.history.delete(ID)`
 
 * Delete an NZB from the history. See `instance.delete()` for arguments.
@@ -226,6 +218,8 @@ However, because the SABnzbd API is horribly inconsistent at times, I've added s
 Changelog
 ---------
 
+* **2.0.0**
+    * Complete rewrite, using native `Promise`'s.
 * **1.2.0**
     * allow passing of parameters with `addurl()` (thanks to @OverFlow636)
 * **1.0.0**

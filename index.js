@@ -234,4 +234,10 @@ class SABnzbd {
 
 }
 
-module.exports = SABnzbd;
+// Allow for class to be called with or without `new` keyword,
+// to maintain backward compatibility.
+module.exports = new Proxy(SABnzbd, {
+  apply(target, thisArg, argumentsList) {
+    return new target(...argumentsList);
+  }
+});
